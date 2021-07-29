@@ -36,5 +36,15 @@
     li {
       margin: 0.5rem 0;
     }
+
+    pre {
+      border-radius: 0.5rem;
+      border-left: 0.5rem solid var(--gray-300);
+      font-family: Consolas, "Andale Mono WT", "Andale Mono", "Lucida Console", "Lucida Sans Typewriter", "DejaVu Sans Mono", "Bitstream Vera Sans Mono", "Liberation Mono", "Nimbus Mono L", Monaco, "Courier New", Courier, monospace;
+      padding: 2rem;
+      background-color: var(--gray-800);
+      overflow-x: auto;
+      margin: 2rem 0;
+    }
   }
 }
