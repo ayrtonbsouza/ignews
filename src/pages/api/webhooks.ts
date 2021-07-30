@@ -1,16 +1,19 @@
-import { NextApiRequest, NextApiResponse } from "next";
+/* eslint-disable consistent-return */
+/* eslint-disable no-case-declarations */
+/* eslint-disable @typescript-eslint/explicit-function-return-type */
+/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
+import { NextApiRequest, NextApiResponse } from 'next';
 import { Readable } from 'stream';
-import Stripe from "stripe";
-import { stripe } from "../../services/stripe";
-import { saveSubscription } from "./_lib/manageSubscription";
+import Stripe from 'stripe';
+import { stripe } from '../../services/stripe';
+import { saveSubscription } from './_lib/manageSubscription';
 
-async function buffer(readable: Readable) {
+async function buffer(readable: Readable): Promise<Buffer> {
   const chunks = [];
 
+  // eslint-disable-next-line no-restricted-syntax
   for await (const chunk of readable) {
-    chunks.push(
-      typeof chunk === 'string' ? Buffer.from(chunk) : chunk
-    );
+    chunks.push(typeof chunk === 'string' ? Buffer.from(chunk) : chunk);
   }
 
   return Buffer.concat(chunks);
@@ -18,9 +21,9 @@ async function buffer(readable: Readable) {
 
 export const config = {
   api: {
-    bodyParser: false
-  }
-}
+    bodyParser: false,
+  },
+};
 
 const relevantEvents = new Set([
   'checkout.session.completed',
@@ -36,7 +39,11 @@ export default async (request: NextApiRequest, response: NextApiResponse) => {
     let event: Stripe.Event;
 
     try {
-      event = stripe.webhooks.constructEvent(buf, secret, process.env.STRIPE_WEBHOOK_SECRET);
+      event = stripe.webhooks.constructEvent(
+        buf,
+        secret,
+        process.env.STRIPE_WEBHOOK_SECRET,
+      );
     } catch (err) {
       return response.status(400).send(`Webhook error: ${err.message}`);
     }
@@ -48,22 +55,21 @@ export default async (request: NextApiRequest, response: NextApiResponse) => {
         switch (type) {
           case 'customer.subscription.updated':
           case 'customer.subscription.deleted':
-
             const subscription = event.data.object as Stripe.Subscription;
             await saveSubscription(
               subscription.id,
               subscription.customer.toString(),
-              false
+              false,
             );
 
             break;
           case 'checkout.session.completed':
-
-            const checkoutSession = event.data.object as Stripe.Checkout.Session;
+            const checkoutSession = event.data
+              .object as Stripe.Checkout.Session;
             await saveSubscription(
               checkoutSession.subscription.toString(),
               checkoutSession.customer.toString(),
-              true
+              true,
             );
 
             break;
@@ -80,4 +86,4 @@ export default async (request: NextApiRequest, response: NextApiResponse) => {
     response.setHeader('Allow', 'POST');
     response.status(405).send('Method not allowed');
   }
-}
+};
